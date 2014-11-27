@@ -6,6 +6,7 @@ Pieces = ['King', 'Queen', 'Rook', 'Knight', 'Bishop', 'Pawn']
 class Board():
 
     CanCastle = [[False, False, False], [False, False, False]]
+    EnPassant = [[],[]]
 
     def deepcopy(self):
         
@@ -224,6 +225,7 @@ class Board():
                             # Ensure the piece is the other player's
                             if self.data[ToCoord[1]][ToCoord[0]-1][1] != self.data[ToCoord[1]][ToCoord[0]][1]:
                                 self.data[ToCoord[1]][ToCoord[0]-1].EnPassant = True
+                                self.EnPassant[1 if Mover is Player.PlayerOne else 0].append(self.data[ToCoord[1]][ToCoord[0]-1])
                             
                     if ToCoord[0] != 7:
                         if self.data[ToCoord[1]][ToCoord[0]+1][0].upper() == 'P':
@@ -231,6 +233,7 @@ class Board():
                             # Ensure the piece is the other player's
                             if self.data[ToCoord[1]][ToCoord[0]+1][1] != self.data[ToCoord[1]][ToCoord[0]][1]:
                                 self.data[ToCoord[1]][ToCoord[0]+1].EnPassant = True
+                                self.EnPassant[1 if Mover is Player.PlayerOne else 0].append(self.data[ToCoord[1]][ToCoord[0]+1])
 
                 # Normal move
                 else:
@@ -266,7 +269,7 @@ class Board():
                         return False
 
                     self.data[ToCoord[1]][ToCoord[0]-1] = board.data[ToCoord[1]][ToCoord[0]+1]
-                    board.data[ToCoord[1]][ToCoord[0]+1] = blank
+                    self.data[ToCoord[1]][ToCoord[0]+1] = blank
 
                 if MoveCoords[0] == 3:
                     if self.CanCastle[0 if Mover is Player.PlayerOne else 1][0]:
@@ -278,13 +281,21 @@ class Board():
                         return False
 
                     self.data[ToCoord[1]][ToCoord[0]+1] = board.data[ToCoord[1]][ToCoord[0]-1]
-                    board.data[ToCoord[1]][ToCoord[0]-1] = blank
+                    self.data[ToCoord[1]][ToCoord[0]-1] = blank
                     
             # No more castling allowed if king is moved
             self.CanCastle[0 if Mover is Player.PlayerOne else 1] = [True, True, True]
     
         self.data[ToCoord[1]][ToCoord[0]] = board.data[FromCoord[1]][FromCoord[0]]
         self.data[FromCoord[1]][FromCoord[0]] = blank
+        
+        if len(self.EnPassant[0 if Mover is Player.PlayerOne else 1]) is not 0:
+
+            for i in range(len(self.EnPassant[0 if Mover is Player.PlayerOne else 1])):
+                self.EnPassant[0 if Mover is Player.PlayerOne else 1][i].EnPassant = False
+
+            self.EnPassant[0 if Mover is Player.PlayerOne else 1] = []
+        
         return True
 
 class Piece(list):
