@@ -1,15 +1,18 @@
+#!/usr/bin/python3
+
 from enum import Enum
 
 Player = Enum('Player', 'PlayerOne PlayerTwo Undefined')
 Pieces = ['King', 'Queen', 'Rook', 'Knight', 'Bishop', 'Pawn']
 
+
 class Board():
 
     CanCastle = [[False, False, False], [False, False, False]]
-    EnPassant = [[],[]]
+    EnPassant = [[], []]
 
     def deepcopy(self):
-        
+
         b = Board()
 
         for i in range(8):
@@ -25,7 +28,6 @@ class Board():
                 if self.data[i][j][0] == 'K':
                     b.data[i][j] = King(['K', Player.PlayerOne])
 
-                    
                 if self.data[i][j][0] == 'r':
                     b.data[i][j] = Rook(['r', Player.PlayerTwo])
                 if self.data[i][j][0] == 'n':
@@ -36,16 +38,16 @@ class Board():
                     b.data[i][j] = Queen(['q', Player.PlayerTwo])
                 if self.data[i][j][0] == 'k':
                     b.data[i][j] = King(['k', Player.PlayerTwo])
-                
+
         return b
 
     # Constructor
-    def __init__(self, blank = [' ', Player.Undefined]):
+    def __init__(self, blank=[' ', Player.Undefined]):
         self.data = [[]]
 
         for i in range(8):
             self.data.append([])
-        
+
         self.data[0].append(Rook(['R', Player.PlayerOne]))
         self.data[0].append(Knight(['N', Player.PlayerOne]))
         self.data[0].append(Bishop(['B', Player.PlayerOne]))
@@ -74,7 +76,6 @@ class Board():
         self.data[7].append(Knight(['n', Player.PlayerTwo]))
         self.data[7].append(Rook(['r', Player.PlayerTwo]))
 
-
     def Render(self, player):
         # Returns an ASCII representation of the board.
         # Prints board as other player views it (current player, not current viewer)
@@ -99,7 +100,7 @@ class Board():
         FromCoord = [int(ord(FromCoord[0])) - 65, int(ord(FromCoord[1])) - 49]
         ToCoord = [int(ord(ToCoord[0])) - 65, int(ord(ToCoord[1])) - 49]
         MoveCoords = [abs(ToCoord[0] - FromCoord[0]), abs(ToCoord[1] - FromCoord[1])]
-        
+
         # Ensure player is moving a piece
         if self.data[FromCoord[1]][FromCoord[0]] == blank:
             print("No piece there")
@@ -125,7 +126,7 @@ class Board():
         if not self.data[FromCoord[1]][FromCoord[0]].IsValidMovePattern(FromCoord, ToCoord):
             print("Invalid move")
             return False
-            
+
         # Compile list of squares traveled on - don't do Knight
         if PieceName is 'R':
 
@@ -152,15 +153,15 @@ class Board():
             if not self.data[FromCoord[1]][FromCoord[0]].HasMoved:
                 self.data[FromCoord[1]][FromCoord[0]].HasMoved = True
                 if Mover == Player.PlayerOne:
-                    if FromCoord == [0,0]:
+                    if FromCoord == [0, 0]:
                         self.CanCastle[0][0] = True
-                    if FromCoord == [7,0]:
+                    if FromCoord == [7, 0]:
                         self.CanCastle[0][1] = True
                 else:
                     print(FromCoord)
-                    if FromCoord == [0,7]:
+                    if FromCoord == [0, 7]:
                         self.CanCastle[1][0] = True
-                    if FromCoord == [7,7]:
+                    if FromCoord == [7, 7]:
                         self.CanCastle[1][1] = True
 
         if PieceName is 'B':
@@ -170,7 +171,7 @@ class Board():
 
                 j = (i + 1) if ToCoord[1] - FromCoord[1] > 0 else (-1 - i)
                 k = (i + 1) if ToCoord[0] - FromCoord[0] > 0 else (-1 - i)
-                
+
                 if self.data[FromCoord[1] + j][FromCoord[0] + k][0] is not ' ':
                     print("Your bishop cannot run over pieces")
                     return False
@@ -180,7 +181,7 @@ class Board():
             # Same as rook and bishop methods
             if MoveCoords[0] == 0 or MoveCoords[1] == 0:
                 for i in range(MoveCoords[0] + MoveCoords[1] - 1):
-                    
+
                     # Vertical move
                     if ToCoord[0] - FromCoord[0] == 0:
                         j = (i + 1) if ToCoord[1] - FromCoord[1] > 0 else (-1 - i)
@@ -199,7 +200,7 @@ class Board():
 
                     j = (i + 1) if ToCoord[1] - FromCoord[1] > 0 else (-1 - i)
                     k = (i + 1) if ToCoord[0] - FromCoord[0] > 0 else (-1 - i)
-                    
+
                     if self.data[FromCoord[1] + j][FromCoord[0] + k][0] is not ' ':
                         print("Your queen cannot run over pieces")
                         return False
@@ -213,7 +214,7 @@ class Board():
 
                 # First move
                 if MoveCoords[1] == 2:
-                    
+
                     if self.data[ToCoord[1]][ToCoord[0]][0] != ' ' or self.data[ToCoord[1]-i][ToCoord[0]][0] != ' ':
                         print("Your pawn cannot run into pieces")
                         return False
@@ -226,10 +227,10 @@ class Board():
                             if self.data[ToCoord[1]][ToCoord[0]-1][1] != self.data[ToCoord[1]][ToCoord[0]][1]:
                                 self.data[ToCoord[1]][ToCoord[0]-1].EnPassant = True
                                 self.EnPassant[1 if Mover is Player.PlayerOne else 0].append(self.data[ToCoord[1]][ToCoord[0]-1])
-                            
+
                     if ToCoord[0] != 7:
                         if self.data[ToCoord[1]][ToCoord[0]+1][0].upper() == 'P':
-                            
+
                             # Ensure the piece is the other player's
                             if self.data[ToCoord[1]][ToCoord[0]+1][1] != self.data[ToCoord[1]][ToCoord[0]][1]:
                                 self.data[ToCoord[1]][ToCoord[0]+1].EnPassant = True
@@ -246,7 +247,7 @@ class Board():
                 if self.data[ToCoord[1]][ToCoord[0]][0] == ' ' and not self.data[FromCoord[1]][FromCoord[0]].EnPassant:
                     print("Your pawn cannot move diagonally")
                     return False
-                
+
                 if self.data[ToCoord[1]][ToCoord[0]][0] == ' ':
                     ToCoord[1] - FromCoord[1]
                     self.data[ToCoord[1] + FromCoord[1] - ToCoord[1]][ToCoord[0]] = blank
@@ -258,12 +259,12 @@ class Board():
                 if self.CanCastle[0 if Mover is Player.PlayerOne else 1][2]:
                     print("You cannot castle after you have moved your king")
                     return False
-                
+
                 if MoveCoords[0] == 2:
                     if self.CanCastle[0 if Mover is Player.PlayerOne else 1][1]:
                         print("This rook has been moved already")
                         return False
-                    
+
                     if self.data[ToCoord[1]][ToCoord[0]][0] != ' ' or self.data[ToCoord[1]][ToCoord[0]-1][0] != ' ':
                         print("Cannot castle through pieces")
                         return False
@@ -275,28 +276,29 @@ class Board():
                     if self.CanCastle[0 if Mover is Player.PlayerOne else 1][0]:
                         print("This rook has been moved already")
                         return False
-                    
+
                     if self.data[ToCoord[1]][ToCoord[0]][0] != ' ' or self.data[ToCoord[1]][ToCoord[0]+1][0] != ' ' or self.data[ToCoord[1]][ToCoord[0]+2][0] != ' ':
                         print("Cannot castle through pieces")
                         return False
 
                     self.data[ToCoord[1]][ToCoord[0]+1] = board.data[ToCoord[1]][ToCoord[0]-1]
                     self.data[ToCoord[1]][ToCoord[0]-1] = blank
-                    
+
             # No more castling allowed if king is moved
             self.CanCastle[0 if Mover is Player.PlayerOne else 1] = [True, True, True]
-    
+
         self.data[ToCoord[1]][ToCoord[0]] = board.data[FromCoord[1]][FromCoord[0]]
         self.data[FromCoord[1]][FromCoord[0]] = blank
-        
+
         if len(self.EnPassant[0 if Mover is Player.PlayerOne else 1]) is not 0:
 
             for i in range(len(self.EnPassant[0 if Mover is Player.PlayerOne else 1])):
                 self.EnPassant[0 if Mover is Player.PlayerOne else 1][i].EnPassant = False
 
             self.EnPassant[0 if Mover is Player.PlayerOne else 1] = []
-        
+
         return True
+
 
 class Piece(list):
 
@@ -304,6 +306,7 @@ class Piece(list):
         print(self)
         print("Validation not done")
         return False
+
 
 class King(Piece):
 
@@ -317,11 +320,12 @@ class King(Piece):
 
         # Castling - AND has higher priority than OR
         if move[1] == 0 and (move[0] == 2 or move[0] == 3):
-            if self[1] == Player.PlayerOne and FromCoord == [4,0] or self[1] == Player.PlayerTwo and FromCoord == [4,7]:
+            if self[1] == Player.PlayerOne and FromCoord == [4, 0] or self[1] == Player.PlayerTwo and FromCoord == [4, 7]:
                 return True
-        
+
         print("Invalid king move")
         return False
+
 
 class Queen(Piece):
 
@@ -336,10 +340,11 @@ class Queen(Piece):
         print("Invalid queen move")
         return False
 
+
 class Rook(Piece):
 
     HasMoved = False
-    
+
     def IsValidMovePattern(self, FromCoord, ToCoord):
 
         move = [ToCoord[0] - FromCoord[0], ToCoord[1] - FromCoord[1]]
@@ -349,6 +354,7 @@ class Rook(Piece):
 
         print("Invalid rook move")
         return False
+
 
 class Knight(Piece):
 
@@ -363,8 +369,9 @@ class Knight(Piece):
         print("Invalid knight move")
         return False
 
+
 class Bishop(Piece):
-    
+
     def IsValidMovePattern(self, FromCoord, ToCoord):
 
         move = [abs(ToCoord[0] - FromCoord[0]), abs(ToCoord[1] - FromCoord[1])]
@@ -376,16 +383,17 @@ class Bishop(Piece):
         print("Invalid bishop move")
         return False
 
+
 class Pawn(Piece):
 
     # Set to True when a pawn moves two squares past
     # Pawn must be on square 3 for PlayerOne or square 4 for PlayerTwo
-    EnPassant = False 
-    
+    EnPassant = False
+
     def IsValidMovePattern(self, FromCoord, ToCoord):
 
         move = [ToCoord[0] - FromCoord[0], ToCoord[1] - FromCoord[1]]
-        
+
         # Player.PlayerOne pawn on back row
         if FromCoord[1] == "0" or FromCoord[1] == "7":
             print("Pawn cannot start on back row")
@@ -418,6 +426,7 @@ class Pawn(Piece):
         print("Invalid pawn move")
         return False
 
+
 def IsValidInput(PieceName, FromCoord, ToCoord):
 
     if len(FromCoord) != len(ToCoord) != 2:
@@ -444,9 +453,9 @@ if __name__ == "__main__":
     board = Board()
     board.Render(Player.PlayerOne)
     turn = Player.PlayerOne
-    
+
     while True:
-        
+
         while turn is Player.PlayerOne:
             move = input("Enter your piece, the starting square, and the ending square (i.e. King E0 F1) ").split(" ")
             if len(move) == 3 and IsValidInput(move[0], move[1], move[2]):
