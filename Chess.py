@@ -217,6 +217,21 @@ class Board():
                         print("Your pawn cannot run into pieces")
                         return False
 
+                    # Check for En Passant
+                    if ToCoord[0] != 0:
+                        if self.data[ToCoord[1]][ToCoord[0]-1][0].upper() == 'P':
+
+                            # Ensure the piece is the other player's
+                            if self.data[ToCoord[1]][ToCoord[0]-1][1] != self.data[ToCoord[1]][ToCoord[0]][1]:
+                                self.data[ToCoord[1]][ToCoord[0]-1].EnPassant = True
+                            
+                    if ToCoord[0] != 7:
+                        if self.data[ToCoord[1]][ToCoord[0]+1][0].upper() == 'P':
+                            
+                            # Ensure the piece is the other player's
+                            if self.data[ToCoord[1]][ToCoord[0]+1][1] != self.data[ToCoord[1]][ToCoord[0]][1]:
+                                self.data[ToCoord[1]][ToCoord[0]+1].EnPassant = True
+
                 # Normal move
                 else:
                     if self.data[ToCoord[1]][ToCoord[0]][0] != ' ':
@@ -225,9 +240,13 @@ class Board():
 
             #Capture
             else:
-                if self.data[ToCoord[1]][ToCoord[0]][0] == ' ':
+                if self.data[ToCoord[1]][ToCoord[0]][0] == ' ' and not self.data[FromCoord[1]][FromCoord[0]].EnPassant:
                     print("Your pawn cannot move diagonally")
                     return False
+                
+                if self.data[ToCoord[1]][ToCoord[0]][0] == ' ':
+                    ToCoord[1] - FromCoord[1]
+                    self.data[ToCoord[1] + FromCoord[1] - ToCoord[1]][ToCoord[0]] = blank
 
         if PieceName is 'K':
 
@@ -350,7 +369,7 @@ class Pawn(Piece):
 
     # Set to True when a pawn moves two squares past
     # Pawn must be on square 3 for PlayerOne or square 4 for PlayerTwo
-    Capture = False 
+    EnPassant = False 
     
     def IsValidMovePattern(self, FromCoord, ToCoord):
 
